@@ -1,0 +1,10 @@
+{
+    "author":"Đan Trường",
+    "avatar":"meme.jpg",
+    "check":true,
+    "username":"dantruong2003",
+    "subscribers":"5.4M",
+    "subscribe":["Bình Gold","Andree Right Hand"],
+    "videos":[],
+    "banner":"binhgold.png"
+}

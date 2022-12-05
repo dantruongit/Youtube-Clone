@@ -1,0 +1,32 @@
+[
+  {
+    "avatar" : "avatar.jpg",
+    "content" : "Technology used : Html - CSS - VueJS - icons global",
+    "time" : "0 giây trước",
+    "img" : ""
+  },
+  {
+    "avatar" : "hungquan.jpg",
+    "content" : "Hùng Quân đã tải lên: Tiếng pháo tiễn người",
+    "time" : "13 ngày trước",
+    "img" : "tptn.jpg"
+  },
+  {
+    "avatar" : "binhgold.jfif",
+    "content" : "Bình Gold đã tải lên: Bật chế độ bay lên - Bình Gold",
+    "time" : "2 tháng trước",
+    "img" : "bcdbl.jpg"
+  },
+  {
+    "avatar" : "binhgold.jfif",
+    "content" : "Bình Gold đã tải lên: Ông bà già tao lo hết - Bình Gold",
+    "time" : "8 tháng trước",
+    "img" : "obgtlh.jpg"
+  },
+  {
+    "avatar" : "andree.jpg",
+    "content" : "Andree Right Hand đã tải lên: Em iu - Andree Right Hand ft. Wxrdie x Bình Gold x 2pillz",
+    "time" : "11 tháng trước",
+    "img" : "ei.jpg"
+  }
+]
