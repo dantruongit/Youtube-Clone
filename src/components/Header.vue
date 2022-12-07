@@ -9,6 +9,12 @@
     <div class="search-bar">
       <i class="ti-search search-icon"></i>
       <input type="text" class="input-bar" placeholder="Search" v-model="keyword">
+      <div class="suggest" :class="[{show : (haveSuggest==true)}]">
+        <div v-for="item of suggest" :key="(item + Math.random().toFixed(5))" @click="clickSuggest(item)"> 
+          <i class="ti-search"></i>  
+          <span>{{ item }}</span>
+        </div>
+      </div>
       <button title="Search" class="btn-search-bar" @click="change()"><i class="ti-search"></i></button>
     </div>
 
@@ -62,13 +68,18 @@ export default {
     notification : Array,
     idSelect : Number,
     showSidebar : Boolean,
-    avatar : String
+    avatar : String,
+    dataVideo : Array,
+    list_users : Array
   },
   data(){
     return {
         keyword : '',
         formNoti : false,
         formUpload : false,
+        suggest : [],
+        haveSuggest : false,
+        clicked : false
     }
   },
   methods:{
@@ -79,6 +90,7 @@ export default {
       this.$emit('update:search', this.keyword)
     },
     home : function(){
+        this.keyword = ''
         this.$emit('update:idSelect',0)
         this.$emit('update:showSidebar',true)
     },
@@ -106,11 +118,44 @@ export default {
         return value.substring(0,95).replace('global','') + '...'
       }
       return value.replace('global','')
+    },
+    clickSuggest : function(value){
+        this.keyword = value
+        this.clicked = true
+        this.suggest = []
+        this.haveSuggest = false
+        this.change()
     }
   },
   watch:{
       keyword : function(){
-        if(this.keyword == '') this.change()
+        if(this.keyword == ''){
+          this.change()
+          this.haveSuggest = false
+        }
+        if(this.keyword!='' && this.clicked == false){
+            this.suggest = []
+            var self = this
+            this.list_users.forEach((channel)=>{
+              if(channel.author.toLowerCase().startsWith(self.keyword.toLowerCase(),0)==true){
+                self.suggest.push(channel.author)
+              }
+            })
+            this.dataVideo.forEach((video)=>{
+              if(video.name.toLowerCase().startsWith(self.keyword.toLowerCase(),0)==true){
+                self.suggest.push(video.name)
+              }
+            })
+            if(this.suggest.length > 0){
+              this.haveSuggest = true
+            }
+            else{
+              this.haveSuggest = false
+            }
+        }
+        else{
+            this.clicked = false
+        }
       }
   }
 }
@@ -239,6 +284,53 @@ i.ti-menu{
 .input-bar:focus{
   outline: none;
 }
+
+.suggest{
+  position: absolute;
+  width : 490px;
+  height : auto;
+  min-height: 100px;
+  background-color: white;
+  margin-top : 46px;
+  left : 17px;
+  border-radius: 10px;
+  display: none;
+}
+
+.suggest div{
+  margin : 16px 0 ;
+  /* background-color: #ccc; */
+  height: 30px;
+  line-height: 30px;
+  position: relative;
+}
+
+.suggest div:hover{
+  background-color: #ccc;
+  cursor: pointer;
+}
+
+.suggest i{
+  color : #000;
+  font-size: 16px;
+  margin-left: 16px;
+  height : 100%;
+  line-height: 30px;
+
+}
+
+.suggest span{
+  color : #000;
+  float : left;
+  margin-left : 16px;
+}
+
+/* .suggest::after{
+    content: '';
+    display: block;
+    height: 20px;
+    margin-bottom: 16px;
+} */
 
 .btn-search-bar{
   position: absolute;

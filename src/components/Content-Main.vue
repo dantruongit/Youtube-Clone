@@ -36,11 +36,6 @@
             </div>
 
             <div class="page-home" v-if="(idSelect == 0)">
-                <div class="categories">
-                    <div class="category" v-for="i in tag.length > 7 ? 7 : tag.length" :key="i" :class="[{categoryActive : index == i-1}]" @click="filterbyTag(i-1,tag[i-1])">
-                        {{ tag[i-1] }}
-                    </div>
-                </div>
                 <template v-if="(data.length > 4)">
                 <div class="rows" v-for="idx in Math.ceil(data.length/4)" v-bind:key="idx">
                     <div v-for="i in 4" :key="i" @click="playVideo(data[i-1+(idx-1)*4].author,data[i-1+(idx-1)*4].name)">
@@ -80,24 +75,24 @@
             </div>
 
             <div class="subscription" v-if="(idSelect == 2)">
-                <p class="title-subscription">This year</p>
-                <template v-if="(length > 5)">
-                <div class="rows" v-for="idx in Math.ceil(data.length/4)" v-bind:key="idx">
-                    <div v-for="i in 5" :key="i" @click="playVideo(data[i-1+(idx-1)*5].author,data[i-1+(idx-1)*5].name)">
+                <p class="title-subscription">Subscribe</p>
+                <template v-if="(list_subscribe.length > 5)">
+                <div class="rows" v-for="idx in Math.ceil(list_subscribe.length/4)" v-bind:key="idx">
+                    <div v-for="i in 5" :key="i" @click="playVideo(list_subscribe[i-1+(idx-1)*5].author,list_subscribe[i-1+(idx-1)*5].name)">
                         <VideoSubscript        
-                        :video="data[i-1+(idx-1)*5]"
-                        :user="list_users[data[i-1+(idx-1)*5].author]"
-                        v-if="data[i-1+(idx-1)*5]"
+                        :video="list_subscribe[i-1+(idx-1)*5]"
+                        :user="list_users[list_subscribe[i-1+(idx-1)*5].author]"
+                        v-if="list_subscribe[i-1+(idx-1)*5]"
                         ></VideoSubscript>
                     </div>
                 </div>
                 </template>
                 <div class="rows" v-else>
-                    <div v-for="i in 5" :key="i" @click="playVideo(data[i-1+(idx-1)*5].author,data[i-1+(idx-1)*5].name)">
+                    <div v-for="i in 5" :key="i" @click="playVideo(list_subscribe[i-1+(idx-1)*5].author,list_subscribe[i-1+(idx-1)*5].name)">
                         <VideoSubscript          
-                        :video="data[i-1]"
-                        :user="list_users[data[i-1].author]"
-                        v-if="data[i-1]"
+                        :video="list_subscribe[i-1]"
+                        :user="list_users[list_subscribe[i-1].author]"
+                        v-if="list_subscribe[i-1]"
                         ></VideoSubscript>
                     </div>
                 </div>
@@ -110,7 +105,8 @@
                     :playing.sync ="playingChild"
                     :user.sync="userChild"
                     :list_users="list_users"
-                    :dataVideo="dataVideo">
+                    :dataVideo="dataVideo"
+                    :apiRoot="apiRoot">
                 </ChannelYoutube>
             </div>
             
@@ -136,14 +132,14 @@
                 selfisLogin : false,
                 indexShort : 0,
                 length : 0,
-                great4 : false,
                 list_video : [],
                 playingChild : {
                     author : '',
                     video : ''
                 },
                 userChild : {},
-                selfAuthorView : ''
+                selfAuthorView : '',
+                list_subscribe : []
             }
         },
         props:{
@@ -208,15 +204,16 @@
         created : function() {
             var self = this
             this.length = this.dataVideo.length
-            this.great4 = this.length > 4
             this.selfisLogin = this.isLogin
             this.dataVideo.forEach(function(item){
                 self.list_video.push(item)
             })
             this.list_video = this.list_video.sort( () => .5 - Math.random());
-            for(var key in this.user){ //Copy user to childUser
-                this.userChild[key] = this.user[key]
-            }
+            this.userChild = Object.assign({},this.user)
+            this.dataVideo.forEach((video)=>{
+                if(self.userChild.subscribe.includes(parseInt(video.author)))
+                    this.list_subscribe.push(video)
+            })
         },
         components : {
             LoginForm,

@@ -66,11 +66,12 @@
             },
             user : Object,
             list_users : Array,
-            dataVideo : Array
+            dataVideo : Array,
+            apiRoot : String
         },
         created : function(){
             this.selfUser = Object.assign({},this.user)
-            if(this.selfUser.subscribe.includes(this.channel.author)){
+            if(this.selfUser.subscribe.includes(this.channel.id)){
                 this.sub = 'Subscribed'
             }
         },
@@ -78,14 +79,22 @@
             subscribe : function(){
                 this.sub = this.sub == 'Subscribe'?'Subscribed' : 'Subscribe';
                 if(this.sub == 'Subscribed'){
-                    if(this.selfUser.subscribe.indexOf(this.channel.author) == -1) this.selfUser.subscribe.push(this.channel.author)
+                    if(this.selfUser.subscribe.indexOf(this.channel.id) == -1) 
+                        this.selfUser.subscribe.push(this.channel.id)
                 }
                 else {
-                    if(this.selfUser.subscribe.indexOf(this.channel.author) != -1){
-                        this.selfUser.subscribe.splice(this.selfUser.subscribe.indexOf(this.channel.author),1)
+                    if(this.selfUser.subscribe.indexOf(this.channel.id) != -1){
+                        this.selfUser.subscribe.splice(this.selfUser.subscribe.indexOf(this.channel.id),1)
                     }
                 }
                 this.$emit('update:user',this.selfUser)
+                fetch(this.apiRoot+'users/'+this.selfUser.id,{
+                    method : 'PUT',
+                    headers:{
+                        'Content-type' : 'application/json'
+                    },
+                    body : JSON.stringify(this.selfUser)
+                })
             },
             compact_name : function(value){
                 if(value.length >=50 )
