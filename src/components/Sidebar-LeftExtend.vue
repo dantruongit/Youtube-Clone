@@ -40,12 +40,12 @@
         <hr>
         <div class="block">
             <p class="title">Subscriptions</p>
-            <div v-for="subscribe of user.subscribe" :key="subscribe" style="padding :0;margin : 0;">
-                <div v-bind:class="[{active : selectchannel === subscribe}]" @click="selectChannel(subscribe)">
-                    <template v-for="channel of authors" >
-                        <img v-if="(channel.author == subscribe)" :src='("/assets/img/avatar/"+channel.avatar)' :key="channel.author">
+            <div v-for="id_subscribe of user.subscribe" :key="list_users[id_subscribe].author" style="padding :0;margin : 0;">
+                <div v-bind:class="[{active : selectchannel === list_users[id_subscribe].author}]" @click="selectChannel(list_users[id_subscribe].author)">
+                    <template v-for="channel of list_users" >
+                        <img v-if="(channel.author == list_users[id_subscribe].author)" :src='("/assets/img/avatar/"+list_users[id_subscribe].avatar)' :key="channel.author">
                     </template>
-                    <span>{{ compact_channel(subscribe) }}</span>
+                    <span>{{ compact_channel(list_users[id_subscribe].author) }}</span>
                 </div>
             </div>  
         </div>
@@ -107,17 +107,8 @@
         },
         props: {
             idSelect : Number,
-            user : {
-                author : String,
-                avatar : String,
-                check : Boolean,
-                username : String,
-                subscribers : String,
-                subscribe : Array,
-                videos : Array,
-                banner : String
-            },
-            authors : Array,
+            user : Object,
+            list_users : Array,
             authorView : String
         },
         created : function(){

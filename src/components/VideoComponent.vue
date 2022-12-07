@@ -1,6 +1,6 @@
 <template>
     <div class="item-video">
-        <img v-bind:src="imgshow" v-on:mouseover="hover()" v-on:mouseleave="dishover()" alt="" :title="name">
+        <img v-bind:src="imgshow" v-on:mouseover="hover()" v-on:mouseleave="dishover()" alt="" :title="video.name">
         <div class="content-video">
             <div class="row" style="margin : 0px;">
                 <div class="avatar col col-2">
@@ -8,17 +8,17 @@
                 </div>
                 <div class="title col col-8">
                     <p class="name-video">
-                        {{ title }}
+                        {{ video.name }}
                     </p>
                     <div class="author">
-                        {{ author }}
-                        <div class="check"  v-if="check" :title="'Verified'">
+                        {{ user.author }}
+                        <div class="check"  v-if="video.check" :title="'Verified'">
                             <i class="ti-check"></i>
                         </div>
                     </div>
                     <div class="view">
                         <br>
-                        <p>{{ view }} views • {{ time }} ago</p>
+                        <p>{{ video.view }} views • {{ video.time }} ago</p>
                     </div>
                 </div>
             </div>
@@ -35,40 +35,32 @@
             }
         },
         props: {
-            name : String,
-            view : String,
-            time : String,
-            avatar : String,
-            iframe : String,
-            image : String,
-            author : String,
-            check : Boolean,
-            link : String,
-            gif : String,
-
+            video : Object,
+            apiRoot : String,
+            user : Object,
             idSelect : Number
         },
         computed : {
             title : function(){
-                if(this.name.length > 61) { return this.name.substring(0,50) + '...'}
-                else return this.name
+                if(this.video.name.length > 61) { return this.video.name.substring(0,50) + '...'}
+                else return this.video.name
             },
             link_avatar : function(){
-                return "/assets/img/avatar/" + this.avatar
+                return "/assets/img/avatar/" + this.user.avatar
             },
             link_image : function(){
-                return "/assets/img/video/" + this.image
+                return "/assets/img/video/" + this.video.image
             },
             link_src : function(){
-                return this.link
+                return this.video.link
             },
             link_gif : function(){
-                return "/assets/img/video/" + this.gif
+                return "/assets/img/video/" + this.video.gif
             }
         },
         methods : {
             hover : function(){
-                this.imgshow = this.link_gif == '' ? this.link_image : this.link_gif
+                this.imgshow = this.video.link_gif == '' ? this.link_image : this.link_gif
             },
             dishover : function(){
                 this.imgshow = this.link_image

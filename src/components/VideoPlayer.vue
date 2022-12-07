@@ -1,21 +1,21 @@
 <template>
     <div>
         <div class="left">
-           <iframe class="video" :src="iframe" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+           <iframe class="video" :src="videoplayer.iframe" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
            <h2 style="width : 100%; text-align: left; font-weight: 550;">{{ compact_title }}</h2>
            <div class="owner">
                 <img class="avatar" :src="link_image" alt="" @click="viewAuthor()" style="cursor:pointer;">
-                <span class="author" @click="viewAuthor()" style="cursor:pointer;">{{channel.author}}</span>
-                <div class="check"  v-if="channel.check">
+                <span class="author" @click="viewAuthor()" style="cursor:pointer;">{{ videoplayer.channel.author }}</span>
+                <div class="check"  v-if="videoplayer.channel.check">
                     <i class="ti-check"></i>
                 </div>
-                <button class="btn btn-subscribe" v-if="(user.author !== channel.author)" :class="[{subscribed : (isSubscribe == 'Subscribed')}]" @click="follow()">{{isSubscribe}}</button>
+                <button class="btn btn-subscribe" v-if="(user.author !== videoplayer.channel.author) && (isLogin==true)" :class="[{subscribed : (isSubscribe == 'Subscribed')}]" @click="follow()">{{isSubscribe}}</button>
                 <br> <br>
-                <span class="sub blur-text">{{channel.subscribers}} subscribers</span>
+                <span class="sub blur-text">{{ videoplayer.channel.subscribers}} subscribers</span>
            </div>
            <div class="description">
-            <p>{{view }} views • {{time}} ago </p><br> <br>
-                {{description}}
+            <p>{{ videoplayer.view }} views • {{videoplayer.time}} ago </p><br> <br>
+                {{videoplayer.description}}
            </div>
         </div>
         <div class="right">
@@ -24,7 +24,7 @@
                     <img class="video" :src="link_video(item.image)" alt="">
                     <div>{{ compact_name(item.name)}} </div>
                     <div class="info">
-                        <p class="blur-text">{{item.author}}</p> <br>
+                        <p class="blur-text">{{list_users[item.author].author}}</p> <br>
                         <p class="blur-text">{{item.view}} views . {{item.time}} ago</p>
                     </div>
                 </template>
@@ -33,6 +33,7 @@
     </div>
 </template>
 <script>
+
 export default{
     name : 'VideoPlayer',
     data(){
@@ -47,38 +48,19 @@ export default{
         for(var key in this.user){
             this.selfUser[key] = this.user[key]
         }
-        if(this.selfUser.subscribe.includes(this.channel.author)){
+        if(this.selfUser.subscribe.includes(this.videoplayer.channel.id)){
             this.isSubscribe = 'Subscribed'
         }
     },
     props:{
-        iframe : String,
-        title : String,
-        description : String,
-        view : String,
-        time : String,
-        channel : {
-            author : String,
-            avatar : String,
-            check : Boolean,
-            subscribers : String
-        },
+        isLogin : Boolean,
+        videoplayer : Object,
         dataVideo : Array,
-        playing: {
-            author : String,
-            video : String
-        },
-        user : {
-            author : String,
-            avatar : String,
-            check : Boolean,
-            username : String,
-            subscribers : String,
-            subscribe : Array,
-            videos : Array,
-            banner : String
-        },
-        authorView : String
+        playing: Object,
+        user : Object,
+        authorView : String,
+        list_users : Array,
+        apiRoot : String
     },
     methods: {
         link_video : function(value){
@@ -98,13 +80,22 @@ export default{
         follow : function(){
             this.isSubscribe = this.isSubscribe=='Subscribe'?'Subscribed':'Subscribe'
             if(this.isSubscribe == 'Subscribed'){
-                if(this.selfUser.subscribe.indexOf(this.channel.author) == -1) this.selfUser.subscribe.push(this.channel.author)
+                if(this.selfUser.subscribe.indexOf(this.videoplayer.channel.id) == -1) 
+                    this.selfUser.subscribe.push(this.videoplayer.channel.id)
             }
             else {
-                if(this.selfUser.subscribe.indexOf(this.channel.author) != -1){
-                    this.selfUser.subscribe.splice(this.selfUser.subscribe.indexOf(this.channel.author),1)
+                if(this.selfUser.subscribe.indexOf(this.videoplayer.channel.id) != -1){
+                    this.selfUser.subscribe.splice(this.selfUser.subscribe.indexOf(this.videoplayer.channel.id),1)
                 }
             }
+            var options = {
+                method : 'PUT',
+                headers : {
+                    'Content-type' : 'application/json'
+                },
+                body :JSON.stringify(this.selfUser)
+            }
+            fetch(this.apiRoot+"users/"+this.selfUser.id,options)
         },
         viewAuthor : function(){
             this.$emit('update:authorView',this.channel.author)
@@ -112,17 +103,16 @@ export default{
     },
     computed : {
         compact_title : function(){
-            if(this.title.length > 70) return this.title.substring(0,70) + '...'
-            return this.title
+            if( this.videoplayer.title.length > 70) return this.videoplayer.title.substring(0,70) + '...'
+            return this.videoplayer.title
         },
         link_image : function(){
-            return '/assets/img/avatar/' + this.channel.avatar
+            return '/assets/img/avatar/' + this.videoplayer.channel.avatar
         },
         
     },
     watch : {
         selfUser : function(){
-            console.log("Update user video-player")
             this.$emit('update:user',this.selfUser)
         }
     }

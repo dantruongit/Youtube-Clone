@@ -16,15 +16,18 @@
     v-if="(isExtend == true && showSidebar==true )" 
     :key="keySidebar"
     :user="user"
+    :list_users="authors"
     :authors="authors"
     :authorView.sync = "authorView">
   </SideBarExtend>
 
   <ContentMain id="content" :class="[{contentZoomOut : (isExtend == true && showSidebar==true)},{full : showSidebar == false}]" 
+    :apiRoot="apiRoot"
+    :isLogin.sync = "isLogin"
     :data="data" 
     :dataVideo="dataVideo"
     :filterTag.sync="filterTag" 
-    :key="keyChild"
+    :key="keyMain"
     :index.sync="indexTag"
     :tag="tag"
     :idSelect="idSelect"
@@ -34,7 +37,8 @@
     :playing.sync="playing"
     :videoPlayer="videoPlayer"
     :user.sync = "user"
-    :authorView.sync="authorView">
+    :authorView.sync="authorView"
+    :list_users="authors">
   </ContentMain>
   </div>
 </template>
@@ -62,14 +66,16 @@ export default {
       if(search == ''){
           this.indexTag = 0
           this.idSelect = 0
-          self.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+          self.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
       }
       for(var item of self.dataVideo)
       {
-        if(item !== undefined && (item.name.toLowerCase().startsWith(search.toLowerCase(),0)==true || item.tag.includes(search) == true))
+        if(item !== undefined && (item.name.toLowerCase().startsWith(search.toLowerCase(),0)==true || item.tag.map((item)=>{
+          return item.toLowerCase()
+        }).includes(search.toLowerCase()) == true))
           self.data.push(item)
       }
-      this.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+      this.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
       this.indexTag = 0
       this.idSelect = 0
       this.keySidebar = Math.ceil(Math.random() * 1000)%123 + ''
@@ -83,7 +89,7 @@ export default {
         if(item !== undefined && item.tag.includes(self.filterTag))
           self.data.push(item)
       }
-      self.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+      self.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
     },
     isExtend : function(){
       this.keySidebar = Math.ceil(Math.random() * 1000)%123 + ''
@@ -93,7 +99,7 @@ export default {
       switch(this.idSelect){
         case -1 : {
           this.showSidebar = true
-          self.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+          self.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
           this.keySidebar = Math.ceil(Math.random() * 1000)%123 + ''
           break
         }
@@ -101,10 +107,10 @@ export default {
           this.keySidebar = Math.ceil(Math.random() * 1000)%123 + ''
         }
       }
-      self.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+      self.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
     },
     showSidebar : function(){
-      this.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+      this.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
       this.keyHeader = Math.ceil(Math.random() * 1000)%123 + ''
     },
     playing: function(){
@@ -118,12 +124,8 @@ export default {
                 self.videoPlayer.time = item.time
             }
         })
-        self.authors.forEach(function(tacgia){
-            if(tacgia.author == self.playing.author){
-                self.videoPlayer.channel = tacgia
-            }
-        })
-        self.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+        self.videoPlayer.channel = Object.assign({},this.authors[parseInt(self.playing.author)])
+        self.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
     },
     authorView : function(){ //Watch này để lắng nghe khi mà thay đổi profile định xem trong sidebar-extend
       var self = this
@@ -132,41 +134,19 @@ export default {
       this.channel = this.authors.find(function(channel){
           return self.authorView == channel.author
         })
-      this.keyChild = Math.ceil(Math.random() * 1000)%123 + ''
+      this.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
     },
     user : function(){
       this.keySidebar = Math.ceil(Math.random() * 10000)%123 + ''
     }
   },
   methods:{
-    loadJSON:function(file,type,data)
-    {
-          var rawFile = new XMLHttpRequest();
-          rawFile.open("GET", file, false);
-          rawFile.onreadystatechange = function ()
-          {
-              if(rawFile.readyState === 4)
-              {
-                  if(rawFile.status === 200 || rawFile.status == 0)
-                  {
-                      var allText = rawFile.responseText;
-                      var tmp = JSON.parse(allText)
-                      if(type=="array"){
-                        tmp.forEach(function(item){
-                          data.push(item)
-                        })
-                      }else if(type=="object"){
-                        for(var i in tmp){
-                          data[i] = tmp[i]
-                        }
-                      }
-                      
-                      return ''
-                  }
-              }
-          }
-          rawFile.send(null);
-          return ''
+    loadData : function(api,callback,options){
+        fetch(api,options)
+          .then(function(response){
+            return response.json()
+          })
+          .then(callback)
     },
     convertToUser : function(str){
         str = str.toLowerCase();
@@ -180,72 +160,64 @@ export default {
         str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // Huyền sắc hỏi ngã nặng 
         str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // Â, Ê, Ă, Ơ, Ư
         return str.replaceAll(' ','');
-    },
-    loadVideo : function(channel){
-        // var self = this
-        this.dataVideo.forEach(function(item){
-            if(channel.author == item.author){
-                channel.videos.push(item)
-            }
-        })
     }
   },
   created: function() {
-    // Load data from file
-    this.loadJSON('/data/video.txt',"array",this.dataVideo)
-    this.loadJSON('/data/notification.txt',"array",this.notification)
-    this.loadJSON('/data/shorts.txt',"array",this.short)
-    this.loadJSON('/data/user.txt',"object",this.user)
-
-    this.loadVideo(this.user)
-    this.authors.push(this.user)
     var self = this
-    this.filter = ''
-    this.dataVideo.forEach(function(item){
-        item.tag.push(item.author)
-        if(self.tag.includes(item.author) == false) self.tag.push(item.author)
-
-        //Push all authors author : function(avatar,author,verified,username,sub,videos)
-        var isExist = false 
-        self.authors.forEach(function(author){
-            if(author.author == item.author) isExist = true
+    //'https://638cbbbfeafd555746ad5623.mockapi.io/api/v1/'
+    this.loadData(this.apiRoot+'notifications',function(notifications){
+        notifications.forEach((noti)=>{
+          self.notification.push(noti)
         })
-        if(isExist==false){
-          var videos = []
-          var channel = new self.author(
-                item.avatar,
-                item.author,
-                item.check,
-                self.convertToUser(item.author) + Math.floor(Math.random()*1000),
-                Math.ceil(500+Math.random()*498) + 'K',
-                videos,
-                item.banner
-          )
-          for(var video of self.dataVideo){
-            if(video.author == channel.author){
-              channel.videos.push(video)
-            }
-          }
-          self.authors.push(channel)
-        }
     })
+    
+    this.loadData(this.apiRoot+'shorts',(shorts)=>{
+        shorts.forEach((short)=>{
+          self.short.push(short)
+        })
+    })
+    this.loadData(this.apiRoot+'users',(users)=>{
+      users.forEach((user)=>{
+        self.authors.push(user)
+      })
+    })
+    this.loadData(this.apiRoot + 'videos',function(videos){
+        videos.forEach(function(video){
+          self.dataVideo.push(video)
+          self.data.push(video)
+        })
+    })
+    this.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
   }
   ,
   data(){
     return {
+      apiRoot : 'https://638cbbbfeafd555746ad5623.mockapi.io/api/v1/' ,
+      isLogin : false, //Kiểm tra xem user đã login vào hệ thống chưa
       indexTag : 0,
       tag : ['All','Music'],
       idSelect : 0,
       showSidebar : true,
       isExtend : false,
-      keyChild : '',
+      keyMain : '',
       keySidebar : 'keySidebar',
       keyHeader : 'keyHeader',
       data : [], //Data video truyền vào home
       authorView : '', //Channel khi bấm vào xem ở Sidebar-extend
-      filter : 'start',
+      filter : 'all',
       filterTag : 'all',
-      user : {},
+      user : {
+        "taikhoan" : "",
+        "matkhau" : "",
+        "author":"",
+        "avatar":"user.jpg",
+        "check":false,
+        "username":"",
+        "subscribers":"",
+        "subscribe":[],
+        "videos":[],
+        "banner":""
+      },
       playing : {
           author : '',
           video : ''
@@ -263,15 +235,6 @@ export default {
             subscribers : ''
         }
       },
-      author : function(avatar,author,verified,username,sub,videos,banner){
-                this.avatar = avatar
-                this.author = author
-                this.check = verified
-                this.username = username
-                this.subscribers = sub
-                this.videos = videos
-                this.banner = banner
-            },
       authors : [
 
       ],

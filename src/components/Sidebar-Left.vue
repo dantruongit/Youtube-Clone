@@ -36,7 +36,7 @@
         methods : {
             change : function(number){
                 this.selected = number
-                if(this.selected > 3) this.selected = 0
+                // if(this.selected > 3) this.selected = 0
             }
         },
         watch : {

@@ -1,18 +1,25 @@
 <template>
     <div>
-        <template v-if="(showSidebar == false)">
+        <template v-if="(isLogin == false && idSelect != 0 && idSelect != 1 && idSelect != 3)">
+            <div class="login">
+                <LoginForm
+                :user.sync="userChild"
+                :apiRoot="apiRoot"
+                :Connected.sync="selfisLogin">
+                </LoginForm>
+            </div>
+        </template>
+        <template v-else-if="(showSidebar == false)">
             <div class="video-player">
                 <VideoPlayer
-                :iframe="videoPlayer.iframe"
-                :title="videoPlayer.title"
-                :description="videoPlayer.description"
-                :view="videoPlayer.view"
-                :time="videoPlayer.time"
-                :channel="videoPlayer.channel"
+                :is-login="isLogin"
+                :videoplayer="videoPlayer"
                 :dataVideo="list_video"
                 :playing.sync="playingChild"
                 :user.sync="userChild"
                 :authorView.sync = "selfAuthorView"
+                :list_users="list_users"
+                :api-root="apiRoot"
                 ></VideoPlayer>
             </div>
         </template>
@@ -21,7 +28,10 @@
                 <ChannelYoutube 
                     :currentUser="user.author"
                     :channel="user"
-                    :playing.sync ="playingChild">
+                    :playing.sync ="playingChild"
+                    :user.sync="userChild"
+                    :list_users="list_users"
+                    :dataVideo="dataVideo">
                 </ChannelYoutube>
             </div>
 
@@ -31,37 +41,24 @@
                         {{ tag[i-1] }}
                     </div>
                 </div>
-                <template v-if="great4">
-                <div class="rows" v-for="idx in Math.ceil(this.length/4)" v-bind:key="idx">
+                <template v-if="(data.length > 4)">
+                <div class="rows" v-for="idx in Math.ceil(data.length/4)" v-bind:key="idx">
                     <div v-for="i in 4" :key="i" @click="playVideo(data[i-1+(idx-1)*4].author,data[i-1+(idx-1)*4].name)">
                         <VideoComponent   
-                        :name = "data[i-1+(idx-1)*4].name"
-                        :image = "data[i-1+(idx-1)*4].image"
-                        :avatar = "data[i-1+(idx-1)*4].avatar"
-                        :view="data[i-1+(idx-1)*4].view" 
-                        :time="data[i-1+(idx-1)*4].time"
-                        :author="data[i-1+(idx-1)*4].author"
-                        :check="data[i-1+(idx-1)*4].check"
-                        :link="data[i-1+(idx-1)*4].link"
-                        :iframe="data[i-1+(idx-1)*4].iframe"
-                        :gif="data[i-1+(idx-1)*4].gif"
+                        :video="data[i-1+(idx-1)*4]"
+                        :apiRoot="apiRoot"
+                        :user="list_users[data[i-1+(idx-1)*4].author]"
                         v-if="data[i-1+(idx-1)*4]"
                         ></VideoComponent>
                     </div>
                 </div>
                 </template>
-                <div class="rows" v-if="great4===false">
+                <div class="rows" v-if="(data.length <= 4)">
                     <div v-for="i in 4" :key="i" @click="playVideo(data[i-1+(idx-1)*4].author,data[i-1+(idx-1)*4].name)">
                         <VideoComponent           
-                        :name = "data[i-1].name"
-                        :image = "data[i-1].image"
-                        :avatar = "data[i-1].avatar"
-                        :view="data[i-1].view" 
-                        :time="data[i-1].time"
-                        :author="data[i-1].author"
-                        :check="data[i-1].check"
-                        :link="data[i-1].link"
-                        :gif="data[i-1].gif"
+                        :video="data[i-1]"
+                        :apiRoot="apiRoot"
+                        :user="list_users[data[i-1].author]"
                         v-if="data[i-1]"
                         ></VideoComponent>
                     </div>
@@ -85,17 +82,11 @@
             <div class="subscription" v-if="(idSelect == 2)">
                 <p class="title-subscription">This year</p>
                 <template v-if="(length > 5)">
-                <div class="rows" v-for="idx in Math.ceil(this.length/4)" v-bind:key="idx">
+                <div class="rows" v-for="idx in Math.ceil(data.length/4)" v-bind:key="idx">
                     <div v-for="i in 5" :key="i" @click="playVideo(data[i-1+(idx-1)*5].author,data[i-1+(idx-1)*5].name)">
                         <VideoSubscript        
-                        :name = "data[i-1+(idx-1)*5].name"
-                        :image = "data[i-1+(idx-1)*5].image"
-                        :view="data[i-1+(idx-1)*5].view" 
-                        :time="data[i-1+(idx-1)*5].time"
-                        :author="data[i-1+(idx-1)*5].author"
-                        :check="data[i-1+(idx-1)*5].check"
-                        :link="data[i-1+(idx-1)*5].link"
-                        :gif="data[i-1+(idx-1)*5].gif"
+                        :video="data[i-1+(idx-1)*5]"
+                        :user="list_users[data[i-1+(idx-1)*5].author]"
                         v-if="data[i-1+(idx-1)*5]"
                         ></VideoSubscript>
                     </div>
@@ -104,14 +95,8 @@
                 <div class="rows" v-else>
                     <div v-for="i in 5" :key="i" @click="playVideo(data[i-1+(idx-1)*5].author,data[i-1+(idx-1)*5].name)">
                         <VideoSubscript          
-                        :name = "data[i-1].name"
-                        :image = "data[i-1].image"
-                        :view="data[i-1].view" 
-                        :time="data[i-1].time"
-                        :author="data[i-1].author"
-                        :check="data[i-1].check"
-                        :link="data[i-1].link"
-                        :gif="data[i-1].gif"
+                        :video="data[i-1]"
+                        :user="list_users[data[i-1].author]"
                         v-if="data[i-1]"
                         ></VideoSubscript>
                     </div>
@@ -123,15 +108,21 @@
                     :currentUser="user.author"
                     :channel="author"
                     :playing.sync ="playingChild"
-                    :user.sync="userChild">
+                    :user.sync="userChild"
+                    :list_users="list_users"
+                    :dataVideo="dataVideo">
                 </ChannelYoutube>
             </div>
-            <div class="page-else" v-else>
+            
+            <div class="page-else" v-if="(idSelect > 3)">
+                <MessageForm></MessageForm>
             </div>
         </template>
     </div> 
 </template>
 <script>
+    import LoginForm from './LoginForm.vue'
+    import MessageForm from './MessageForm.vue'
     import VideoComponent from './VideoComponent.vue'
     import VideoShort from './VideoShort.vue'
     import VideoSubscript from './VideoSubscriptions.vue'
@@ -142,6 +133,7 @@
         name : 'ContentMain',
         data(){
             return {
+                selfisLogin : false,
                 indexShort : 0,
                 length : 0,
                 great4 : false,
@@ -155,16 +147,9 @@
             }
         },
         props:{
-            user : {
-                name : String,
-                avatar : String,
-                check : Boolean,
-                username : String,
-                subscribers : String,
-                subscribe : Array,
-                videos : Array,
-                banner : String
-            },
+            apiRoot : String,
+            isLogin : Boolean,
+            user : Object,
             author : {
                 avatar : String,
                 author : String,
@@ -187,18 +172,9 @@
                 author : String,
                 video : String
             },
-            videoPlayer : {
-                iframe : String,
-                title : String,
-                description : String,
-                channel : {
-                    author : String,
-                    avatar : String,
-                    check : Boolean,
-                    subscribers : String
-                }
-            },
-            authorView : String
+            videoPlayer : Object,
+            authorView : String,
+            list_users : Array
         },
         watch : {
             playingChild : function(){
@@ -210,6 +186,9 @@
             },
             selfAuthorView : function(){
                 this.$emit('update:authorView',this.selfAuthorView)
+            },
+            selfisLogin : function(){
+                this.$emit('update:isLogin',this.selfisLogin)
             }
         },
         methods:{
@@ -228,8 +207,9 @@
         },
         created : function() {
             var self = this
-            this.length = this.data.length
+            this.length = this.dataVideo.length
             this.great4 = this.length > 4
+            this.selfisLogin = this.isLogin
             this.dataVideo.forEach(function(item){
                 self.list_video.push(item)
             })
@@ -239,11 +219,13 @@
             }
         },
         components : {
+            LoginForm,
             VideoComponent,
             VideoShort,
             VideoSubscript,
             ChannelYoutube,
-            VideoPlayer
+            VideoPlayer,
+            MessageForm
         }
     }
 </script>

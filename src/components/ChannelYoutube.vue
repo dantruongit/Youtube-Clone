@@ -11,7 +11,7 @@
                     <div class="check"  v-if="channel.check">
                                 <i class="ti-check"></i>
                     </div> <br>
-                    <span class="left white blur-text">@{{channel.username}}</span> <br>
+                    <span class="left white blur-text">@{{channel.username}}</span> <br> <br>
                     <span class="left white blur-text">{{channel.subscribers}} subscribers</span>
                 </div>
                 <div class="subscribe">
@@ -28,16 +28,16 @@
         </div>
         <hr>
         <div class="content">
-            <div class="video" v-for="item in channel.videos" :key="item.name" @click="playVideo(item.author,item.name)">
-                <img class="image-video left" :src="link_image(item.image)" alt="">
-                <p class="left white">{{ compact_name(item.name) }}</p> <br> <br>
-                <span class="left blur-text">{{ item.author }}</span>
+            <div class="video" v-for="item of channel.videos" :key="item" @click="playVideo(channel.id,dataVideo[item].name)">
+                <img class="image-video left" :src="link_image(dataVideo[item].image)" alt="">
+                <p class="left white">{{ compact_name(dataVideo[item].name) }}</p> <br> <br>
+                <span class="left blur-text">{{ channel.author }}</span>
 
-                <div class="check"  v-if="item.check">
+                <div class="check"  v-if="channel.check">
                     <i class="ti-check"></i>
                 </div>
-                <span class="view left blur-text">{{item.view}} views • {{item.time}} ago </span> <br> <br>
-                <span class="description left blur-text">{{ description(item.description) }}</span>
+                <span class="view left blur-text">{{dataVideo[item].view}} views • {{dataVideo[item].time}} ago </span> <br> <br>
+                <span class="description left blur-text">{{ description(dataVideo[item].description) }}</span>
             </div>
         </div>
     </div>
@@ -59,34 +59,17 @@
         },
         props:{
             currentUser : String,
-            channel : {
-                avatar : String,
-                author : String,
-                check : Boolean,
-                username : String,
-                subscribers : String,
-                videos : Array,
-                banner : String
-            },
+            channel : Object,
             playing : {
                 author : String,
                 video : String
             },
-            user : {
-                name : String,
-                avatar : String,
-                check : Boolean,
-                username : String,
-                subscribers : String,
-                subscribe : Array,
-                videos : Array,
-                banner : String
-            }
+            user : Object,
+            list_users : Array,
+            dataVideo : Array
         },
         created : function(){
-            for(var key in this.user){
-                this.selfUser[key] = this.user[key]
-            }
+            this.selfUser = Object.assign({},this.user)
             if(this.selfUser.subscribe.includes(this.channel.author)){
                 this.sub = 'Subscribed'
             }

@@ -1,21 +1,21 @@
 <template>
-    <div class="item-video" :title="name">
+    <div class="item-video" :title="video.name">
         <img v-bind:src="imgshow" v-on:mouseover="hover()" v-on:mouseleave="dishover()" alt="" >
         <div class="content-video">
             <div class="row" style="margin : 0px;">
                 <div class="title col">
                     <p class="name-video">
-                        {{ title }}
+                        {{ video.title }}
                     </p>
                     <div class="author">
-                        {{ author }}
-                        <div class="check"  v-if="check">
+                        {{ user.author }}
+                        <div class="check"  v-if="user.check">
                             <i class="ti-check"></i>
                         </div>
                     </div>
                     <div class="view">
                         <br>
-                        <p>{{ view }} views • {{ time }} ago</p>
+                        <p>{{ video.view }} views • {{ video.time }} ago</p>
                     </div>
                 </div>
             </div>
@@ -27,15 +27,8 @@
     export default{
         name : 'VideoSubscriptions',
         props: {
-            name : String,
-            view : String,
-            time : String,
-            avatar : String,
-            image : String,
-            author : String,
-            check : Boolean,
-            link : String,
-            gif : String
+            video : Object,
+            user : Object
         },
         computed : {
             title : function(){
@@ -43,16 +36,16 @@
                 else return this.name
             },
             link_avatar : function(){
-                return "/assets/img/avatar/" + this.avatar
+                return "/assets/img/avatar/" + this.user.avatar
             },
             link_image : function(){
-                return "/assets/img/video/" + this.image
+                return "/assets/img/video/" + this.video.image
             },
             link_src : function(){
                 return this.link
             },
             link_gif : function(){
-                return "/assets/img/video/" + this.gif
+                return "/assets/img/video/" + this.video.gif
             }
         },
         methods : {
