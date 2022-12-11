@@ -24,6 +24,13 @@
             </div>
         </template>
         <template v-else>
+            <div class="upload-video" v-if="(idSelect == -2)">
+                <UploadVideo
+                :user="userChild"
+                :api-root="apiRoot"
+                :isreload.sync="selfReload">        
+                </UploadVideo>
+            </div>
             <div class="user" v-if="(idSelect == -1)">
                 <ChannelYoutube 
                     :currentUser="user.author"
@@ -117,13 +124,14 @@
     </div> 
 </template>
 <script>
+    import ChannelYoutube from './ChannelYoutube.vue'
     import LoginForm from './LoginForm.vue'
     import MessageForm from './MessageForm.vue'
     import VideoComponent from './VideoComponent.vue'
     import VideoShort from './VideoShort.vue'
     import VideoSubscript from './VideoSubscriptions.vue'
-    import ChannelYoutube from './ChannelYoutube.vue'
     import VideoPlayer from './VideoPlayer.vue'
+    import UploadVideo from './UploadVideo.vue'
 
     export default{
         name : 'ContentMain',
@@ -139,7 +147,8 @@
                 },
                 userChild : {},
                 selfAuthorView : '',
-                list_subscribe : []
+                list_subscribe : [],
+                selfReload : 'iok'
             }
         },
         props:{
@@ -170,7 +179,8 @@
             },
             videoPlayer : Object,
             authorView : String,
-            list_users : Array
+            list_users : Array,
+            isreload : String
         },
         watch : {
             playingChild : function(){
@@ -185,6 +195,10 @@
             },
             selfisLogin : function(){
                 this.$emit('update:isLogin',this.selfisLogin)
+            },
+            isreload : function(){
+                console.log("self reload contentmain")
+                this.$emit('update:isreload',this.selfReload)
             }
         },
         methods:{
@@ -214,6 +228,7 @@
                 if(self.userChild.subscribe.includes(parseInt(video.author)))
                     this.list_subscribe.push(video)
             })
+            this.selfReload = this.isreload
         },
         components : {
             LoginForm,
@@ -222,7 +237,8 @@
             VideoSubscript,
             ChannelYoutube,
             VideoPlayer,
-            MessageForm
+            MessageForm,
+            UploadVideo
         }
     }
 </script>

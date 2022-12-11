@@ -23,8 +23,8 @@
         <img :src="link_image(avatar)" alt="" width="32px" height="32px">
       </div>
       <!-- Notifications -->
-      <i title="Notifications" class="ti-bell" :class="[{active : formNoti},{formShow : formNoti == true}]" @click="show('noti')">
-        <div class="form noti" :class="[{show : formNoti==true}]">
+      <i title="Notifications" class="ti-bell" :class="[{active : formNoti && isLogin},{formShow : formNoti == true && isLogin}]" @click="show('noti')">
+        <div class="form noti" :class="[{show : formNoti==true && isLogin}]">
           <div class="row" v-for="item of notification" :key="item.content">
             <div class="userNoti">
               <img :src="link_image(item.avatar)" alt="">
@@ -43,9 +43,9 @@
         </div>
       </i>
       <!-- Upload video -->
-      <i title="Create" class="ti-video-camera" :class="[{active : formUpload},{formShow : formUpload == true}]" @click="show('upload')">
-        <div class="form upload" :class="[{show : formUpload==true}]">
-          <div class="row">
+      <i title="Create" class="ti-video-camera" :class="[{active : formUpload && isLogin},{formShow : formUpload == true && isLogin}]" @click="show('upload')">
+        <div class="form upload" :class="[{show : formUpload==true && isLogin}]">
+          <div class="row" @click="upload">
             <i class="ti-upload"></i>
             <span>Upload video</span>
           </div>
@@ -63,6 +63,7 @@
 export default {
   name: 'HelloWorld',
   props: {
+    isLogin : Boolean,
     search : String,
     isExtend : Boolean,
     notification : Array,
@@ -125,6 +126,9 @@ export default {
         this.suggest = []
         this.haveSuggest = false
         this.change()
+    },
+    upload : function(){
+      this.$emit('update:idSelect',-2)
     }
   },
   watch:{
@@ -420,6 +424,7 @@ i.ti-upload,i.ti-eye{
     transform: translateY(-50%);
     font-size: 20px;
 }
+
 
 .noti{
   top : 8%;

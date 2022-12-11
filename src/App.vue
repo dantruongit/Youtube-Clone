@@ -1,6 +1,7 @@
 <template>
   <div id="app">
   <Header id="header" 
+  :isLogin="isLogin"
   :search.sync="filter" 
   :is-extend.sync = "isExtend"
   :notification="notification"
@@ -15,12 +16,12 @@
   <SideBar id="sidebar" :idSelect.sync = "idSelect" v-if="(isExtend == false && showSidebar==true)" :key="keySidebar"></SideBar>
   <SideBarExtend id="sidebarextend" 
     :idSelect.sync = "idSelect" 
-    v-if="(isExtend == true && showSidebar==true )" 
     :key="keySidebar"
     :user="user"
     :list_users="authors"
     :authors="authors"
-    :authorView.sync = "authorView">
+    :authorView.sync = "authorView"
+    v-if="(isExtend == true && showSidebar==true)">
   </SideBarExtend>
 
   <ContentMain id="content" :class="[{contentZoomOut : (isExtend == true && showSidebar==true)},{full : showSidebar == false}]" 
@@ -37,7 +38,8 @@
     :videoPlayer="videoPlayer"
     :user.sync = "user"
     :authorView.sync="authorView"
-    :list_users="authors">
+    :list_users="authors"
+    :isreload.sync="forceReload">
   </ContentMain>
   </div>
 </template>
@@ -124,6 +126,12 @@ export default {
     },
     user : function(){
       this.keySidebar = Math.ceil(Math.random() * 10000)%123 + ''
+    },
+    isLogin : function(){
+      this.idSelect = 0
+    },
+    forceReload : function(){
+      this.reload()
     }
   },
   methods:{
@@ -133,6 +141,19 @@ export default {
             return response.json()
           })
           .then(callback)
+    },
+    reload : function(){
+      console.log("Hàm reload đã chạy")
+      var self = this
+      this.dataVideo = []
+      this.data = []
+      this.loadData(this.apiRoot + 'videos',function(videos){
+        videos.forEach(function(video){
+          self.dataVideo.push(video)
+          self.data.push(video)
+        })
+      })
+      this.keyMain = Math.ceil(Math.random() * 1000)%123 + ''
     }
   },
   created: function() {
@@ -172,6 +193,7 @@ export default {
       keyMain : '',
       keySidebar : 'keySidebar',
       keyHeader : 'keyHeader',
+      forceReload : 'ioioio', // Báo hiệu cho vue biết khi nào cần fetch lại api video mới
       data : [], //Data video truyền vào home
       authorView : '', //Channel khi bấm vào xem ở Sidebar-extend
       filter : 'all',

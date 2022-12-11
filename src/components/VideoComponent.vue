@@ -8,7 +8,7 @@
                 </div>
                 <div class="title col col-8">
                     <p class="name-video">
-                        {{ video.name }}
+                        {{ title }}
                     </p>
                     <div class="author">
                         {{ user.author }}

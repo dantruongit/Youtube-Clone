@@ -5,7 +5,7 @@
             <div class="row" style="margin : 0px;">
                 <div class="title col">
                     <p class="name-video">
-                        {{ video.title }}
+                        {{ title }}
                     </p>
                     <div class="author">
                         {{ user.author }}
@@ -32,8 +32,8 @@
         },
         computed : {
             title : function(){
-                if(this.name.length > 61) { return this.name.substring(0,50) + '...'}
-                else return this.name
+                if(this.video.name.length > 61) { return this.video.name.substring(0,50) + '...'}
+                else return this.video.name
             },
             link_avatar : function(){
                 return "/assets/img/avatar/" + this.user.avatar
