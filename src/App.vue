@@ -185,7 +185,7 @@ export default {
   ,
   data(){
     return {
-      apiRoot : 'http://localhost:3000/' ,
+      apiRoot : 'https://638cbbbfeafd555746ad5623.mockapi.io/api/v1/' ,
       isLogin : false, //Kiểm tra xem user đã login vào hệ thống chưa
       idSelect : 0,
       showSidebar : true,
