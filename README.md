@@ -1,5 +1,7 @@
 # youtube_clone
 
+# Link published : https://ytb-dev.ddns.net/
+
 ## Project setup
 ```
 npm install
